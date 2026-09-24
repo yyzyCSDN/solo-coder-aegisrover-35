@@ -1,8 +1,15 @@
-import hashlib, json
+import hashlib
+
+from .repository import canonical_json
+
+
+def _digest(state):
+    return hashlib.sha256(canonical_json(state).encode()).hexdigest()
+
 
 def create(name, sequence, state):
-    body = json.dumps(state).encode()
-    return {'name': name, 'sequence': sequence, 'state': state, 'digest': hashlib.sha256(body).hexdigest()}
+    return {'name': name, 'sequence': sequence, 'state': state, 'digest': _digest(state)}
+
 
 def verify(c):
-    return c['digest'] == hashlib.sha256(json.dumps(c['state'], sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    return c['digest'] == _digest(c['state'])
